@@ -1,0 +1,68 @@
+{
+	"name": "dataflow6",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "AzureSqlTable29",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				},
+				{
+					"dataset": {
+						"referenceName": "AzureSqlTable31",
+						"type": "DatasetReference"
+					},
+					"name": "source2"
+				},
+				{
+					"dataset": {
+						"referenceName": "AzureSqlTable33",
+						"type": "DatasetReference"
+					},
+					"name": "source3"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "AzureSqlTable36",
+						"type": "DatasetReference"
+					},
+					"name": "FinishedGoods"
+				},
+				{
+					"dataset": {
+						"referenceName": "AzureSqlTable37",
+						"type": "DatasetReference"
+					},
+					"name": "UnfinishedGoods"
+				}
+			],
+			"transformations": [
+				{
+					"name": "Join1"
+				},
+				{
+					"name": "Join2"
+				},
+				{
+					"name": "Aggregate1"
+				},
+				{
+					"name": "ConditionalSplit1"
+				},
+				{
+					"name": "Select3"
+				},
+				{
+					"name": "Select4"
+				}
+			],
+			"script": "source(output(\n\t\tWorkOrderID as integer,\n\t\tProductID as integer,\n\t\tOrderQty as integer,\n\t\tStockedQty as integer,\n\t\tScrappedQty as short,\n\t\tStartDate as timestamp,\n\t\tEndDate as timestamp,\n\t\tDueDate as timestamp,\n\t\tScrapReasonID as short,\n\t\tModifiedDate as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> source1\nsource(output(\n\t\tWorkOrderID as integer,\n\t\tProductID as integer,\n\t\tOperationSequence as short,\n\t\tLocationID as short,\n\t\tScheduledStartDate as timestamp,\n\t\tScheduledEndDate as timestamp,\n\t\tActualStartDate as timestamp,\n\t\tActualEndDate as timestamp,\n\t\tActualResourceHrs as decimal(9,4),\n\t\tPlannedCost as decimal(19,4),\n\t\tActualCost as decimal(19,4),\n\t\tModifiedDate as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> source2\nsource(output(\n\t\tProductID as integer,\n\t\tName as string,\n\t\tProductNumber as string,\n\t\tMakeFlag as boolean,\n\t\tFinishedGoodsFlag as boolean,\n\t\tColor as string,\n\t\tSafetyStockLevel as short,\n\t\tReorderPoint as short,\n\t\tStandardCost as decimal(19,4),\n\t\tListPrice as decimal(19,4),\n\t\tSize as string,\n\t\tSizeUnitMeasureCode as string,\n\t\tWeightUnitMeasureCode as string,\n\t\tWeight as decimal(8,2),\n\t\tDaysToManufacture as integer,\n\t\tProductLine as string,\n\t\tClass as string,\n\t\tStyle as string,\n\t\tProductSubcategoryID as integer,\n\t\tProductModelID as integer,\n\t\tSellStartDate as timestamp,\n\t\tSellEndDate as timestamp,\n\t\tDiscontinuedDate as timestamp,\n\t\trowguid as string,\n\t\tModifiedDate as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> source3\nsource1, source2 join(source1@WorkOrderID == source2@WorkOrderID,\n\tjoinType:'inner',\n\tbroadcast: 'auto')~> Join1\nSelect3, source3 join(Select3@ProductID == source3@ProductID,\n\tjoinType:'inner',\n\tbroadcast: 'auto')~> Join2\nSelect4 aggregate(groupBy(ProductID,\n\t\tWorkOrderID,\n\t\tFinishedGoodsFlag,\n\t\tLocationID),\n\tTotalOrderQty = sum(OrderQty),\n\t\t{Total StockedQty} = sum(StockedQty),\n\t\tScrappedQty = sum(ScrappedQty),\n\t\tCOGS = sum(StandardCost),\n\t\tActualCost = sum(ActualCost)) ~> Aggregate1\nAggregate1 split(FinishedGoodsFlag== true(),\n\tdisjoint: false) ~> ConditionalSplit1@(Finishedgoods, Unfinishedgoods)\nJoin1 select(mapColumn(\n\t\tWorkOrderID = {source1@WorkOrderID},\n\t\tProductID = {source1@ProductID},\n\t\tOrderQty,\n\t\tStockedQty,\n\t\tScrappedQty,\n\t\tStartDate,\n\t\tEndDate,\n\t\tDueDate,\n\t\tWorkOrderID = {source2@WorkOrderID},\n\t\tProductID = {source2@ProductID},\n\t\tLocationID,\n\t\tPlannedCost,\n\t\tActualCost\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Select3\nJoin2 select(mapColumn(\n\t\tWorkOrderID,\n\t\tProductID = {Select3@ProductID},\n\t\tOrderQty,\n\t\tStockedQty,\n\t\tScrappedQty,\n\t\tStartDate,\n\t\tEndDate,\n\t\tDueDate,\n\t\tLocationID,\n\t\tPlannedCost,\n\t\tActualCost,\n\t\tProductID = {source3@ProductID},\n\t\tName,\n\t\tMakeFlag,\n\t\tFinishedGoodsFlag,\n\t\tStandardCost,\n\t\tListPrice,\n\t\tProductSubcategoryID\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Select4\nConditionalSplit1@Finishedgoods sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> FinishedGoods\nConditionalSplit1@Unfinishedgoods sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> UnfinishedGoods"
+		}
+	}
+}

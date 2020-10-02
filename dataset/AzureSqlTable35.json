@@ -1,0 +1,17 @@
+{
+	"name": "AzureSqlTable35",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDatabase3",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "unfinishedgoods"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

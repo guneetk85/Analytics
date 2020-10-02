@@ -1,0 +1,106 @@
+{
+	"name": "AzureSqlTable12",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDatabase1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "DateKey",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "FullDateAlternateKey",
+				"type": "date"
+			},
+			{
+				"name": "DayNumberOfWeek",
+				"type": "tinyint",
+				"precision": 3
+			},
+			{
+				"name": "EnglishDayNameOfWeek",
+				"type": "nvarchar"
+			},
+			{
+				"name": "SpanishDayNameOfWeek",
+				"type": "nvarchar"
+			},
+			{
+				"name": "FrenchDayNameOfWeek",
+				"type": "nvarchar"
+			},
+			{
+				"name": "DayNumberOfMonth",
+				"type": "tinyint",
+				"precision": 3
+			},
+			{
+				"name": "DayNumberOfYear",
+				"type": "smallint",
+				"precision": 5
+			},
+			{
+				"name": "WeekNumberOfYear",
+				"type": "tinyint",
+				"precision": 3
+			},
+			{
+				"name": "EnglishMonthName",
+				"type": "nvarchar"
+			},
+			{
+				"name": "SpanishMonthName",
+				"type": "nvarchar"
+			},
+			{
+				"name": "FrenchMonthName",
+				"type": "nvarchar"
+			},
+			{
+				"name": "MonthNumberOfYear",
+				"type": "tinyint",
+				"precision": 3
+			},
+			{
+				"name": "CalendarQuarter",
+				"type": "tinyint",
+				"precision": 3
+			},
+			{
+				"name": "CalendarYear",
+				"type": "smallint",
+				"precision": 5
+			},
+			{
+				"name": "CalendarSemester",
+				"type": "tinyint",
+				"precision": 3
+			},
+			{
+				"name": "FiscalQuarter",
+				"type": "tinyint",
+				"precision": 3
+			},
+			{
+				"name": "FiscalYear",
+				"type": "smallint",
+				"precision": 5
+			},
+			{
+				"name": "FiscalSemester",
+				"type": "tinyint",
+				"precision": 3
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "Datedimension"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

@@ -1,0 +1,32 @@
+{
+	"name": "dataflow3",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "AzureSqlTable12",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "AzureSqlTable13",
+						"type": "DatasetReference"
+					},
+					"name": "period"
+				}
+			],
+			"transformations": [
+				{
+					"name": "DerivedColumn1"
+				}
+			],
+			"script": "source(output(\n\t\tDateKey as integer,\n\t\tFullDateAlternateKey as date,\n\t\tDayNumberOfWeek as byte,\n\t\tEnglishDayNameOfWeek as string,\n\t\tSpanishDayNameOfWeek as string,\n\t\tFrenchDayNameOfWeek as string,\n\t\tDayNumberOfMonth as byte,\n\t\tDayNumberOfYear as short,\n\t\tWeekNumberOfYear as byte,\n\t\tEnglishMonthName as string,\n\t\tSpanishMonthName as string,\n\t\tFrenchMonthName as string,\n\t\tMonthNumberOfYear as byte,\n\t\tCalendarQuarter as byte,\n\t\tCalendarYear as short,\n\t\tCalendarSemester as byte,\n\t\tFiscalQuarter as byte,\n\t\tFiscalYear as short,\n\t\tFiscalSemester as byte\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> source1\nsource1 derive({Month Number} = case(\r\n    \r\n    \r\n    \r\n    EnglishMonthName=='January', 1, \r\n    EnglishMonthName=='Feburary',2,\r\n    EnglishMonthName=='March',3,\r\n    EnglishMonthName=='April',4,\r\n    EnglishMonthName=='May',5,\r\n    EnglishMonthName=='June',6,\r\n    EnglishMonthName=='July',7,\r\n    EnglishMonthName=='August',8,\r\n    EnglishMonthName=='September',9,\r\n    EnglishMonthName=='October',10,\r\n    EnglishMonthName=='November',11,\r\n    EnglishMonthName=='December',12)) ~> DerivedColumn1\nDerivedColumn1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> period"
+		}
+	}
+}
