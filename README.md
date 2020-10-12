@@ -1,1 +1,1 @@
-# Analytics And ETL (R and Micorsoft Azure Data Factory)
+# Analytics and ETL (R and Micorsoft Azure Data Factory)
